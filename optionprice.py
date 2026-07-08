@@ -35,18 +35,19 @@ price_step=1000
 time_dif=(total_exercise_time/(time_step))
 price_dif=(max_price)/price_step
 v_i=0
-vi1=0
 vi2=0
+vi1=0
+vt2=np.zeros(1000)
 K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][0]
 print(K,'K')
 for i in range(0,time_step):
-	for j in range(0,price_step):
+	for j in range(0,price_step-1):
 		v_i=vi1
 		vi1=max((i+1)*price_dif-K,0)
 		vi2=max((i+2)*price_dif-K,0)
 		a=0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
 		b=1+(volatility**2)*(j**2)*time_dif+r*time_dif
 		c=-0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
-		vt2=a*v_i+b*vi1+c*vi2
+		vt2[j+1]=a*v_i+b*vi1+c*vi2
 
-print(vt2,"option price")
+print(vt2[999],"option price")

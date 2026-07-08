@@ -1,6 +1,7 @@
 import yfinance as yf 
 import numpy as np
-data =yf.download("AAPL",start="2026-01-01", end ="2027-07-01")
+stc="AAPL"
+data =yf.download(stc,start="2026-01-01", end ="2027-07-01")
 print(data)
 print(data['Close'].to_numpy(),"values")
 close_prices=(np.zeros(len(data['Close'].to_numpy())))
@@ -39,7 +40,7 @@ c=1/(price_dif**2)
 v_i=0
 vi1=0
 vi2=0
-K=yf.Ticker("AAPL").option_chain(yf.Ticker("AAPL").options[0]).calls['strike'][1]
+K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][1]
 print(K,'K')
 for i in range(0,time_step):
 	v_i=vi1

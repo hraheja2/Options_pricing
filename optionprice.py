@@ -1,6 +1,6 @@
 import yfinance as yf 
 import numpy as np
-stc="AAPL"
+stc="NVDA"
 data =yf.download(stc,start="2026-01-01", end ="2027-07-01")
 print(data)
 print(data['Close'].to_numpy(),"values")
@@ -26,26 +26,27 @@ variance=variance/((len(data['Close'].to_numpy()))-1)
 print(variance,'variance')
 volatility=np.sqrt(variance*252)
 print(volatility,'volatliity')
-r=0.045
-max_price=2*close_prices[-1]
+r=0.055
+max_price=1.03*np.exp((30*mean))*close_prices[-1]
 print(max_price,'max_price')
-total_exercise_time=1
+total_exercise_time=1/12
 time_step=1000
 price_step=1000
-time_dif=total_exercise_time/time_step-1
-price_dif=(max_price-close_prices[-1])/price_step
-a=1/time_dif
-b=1/(2*price_dif)
-c=1/(price_dif**2)
+time_dif=(total_exercise_time/(time_step))
+price_dif=(max_price)/price_step
 v_i=0
 vi1=0
 vi2=0
-K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][1]
+K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][0]
 print(K,'K')
 for i in range(0,time_step):
-	v_i=vi1
-	vi1=max((i+1)*price_dif-K,0)
-	for j in range(i,i+1):
-		vi2=vi1*(a+(r*(j*price_dif)*b)+((volatility**2)*((j*price_dif)**2)*c))/((a+(r*(j*price_dif)*b)+(0.5*(volatility**2)*((j*price_dif)**2)*c))-r)+v_i*(0.5*(volatility**2)*((j*price_dif)**2)*c)/(a+(r*(j*price_dif)*b)+(0.5*(volatility**2)*((j*price_dif)**2)*c)-r)
+	for j in range(0,price_step):
+		v_i=vi1
+		vi1=max((i+1)*price_dif-K,0)
+		vi2=max((i+2)*price_dif-K,0)
+		a=0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
+		b=1+(volatility**2)*(j**2)*time_dif+r*time_dif
+		c=-0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
+		vt2=a*v_i+b*vi1+c*vi2
 
-print(vi2,"option price")
+print(vt2,"option price")

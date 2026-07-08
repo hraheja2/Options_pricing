@@ -44,8 +44,8 @@ print(K,'K')
 for i in range(0,time_step-2):
 	vt3=vt2
 	v_i=0
-	vi1=0
-	vi2=0
+	vi1=price_dif
+	vi2=2*price_dif
 	for j in range(0,price_step-2):
 		a=0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
 		b=1+(volatility**2)*(j**2)*time_dif+r*time_dif

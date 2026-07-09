@@ -1,5 +1,6 @@
 import yfinance as yf 
 import numpy as np
+import matplotlib.pyplot as plt 
 stc="TMO"
 data =yf.download(stc,start="2026-01-01", end ="2027-07-01")
 print(data)
@@ -27,11 +28,11 @@ print(variance,'variance')
 volatility=np.sqrt(variance*252)
 print(volatility,'volatliity')
 r=0.045
-max_price=1.1*close_prices[-1]
+max_price=2*close_prices[-1]
 print(max_price,'max_price')
 total_exercise_time=1/12
-time_step=1000
-price_step=1000
+time_step=20
+price_step=20
 time_dif=(total_exercise_time/(time_step))
 price_dif=(max_price)/price_step
 v_i=0
@@ -44,22 +45,49 @@ print(K,'K')
 v_i=0
 vi1=max(price_dif-K,0)
 vi2=max(2*price_dif-K,0)
+vt2[:,-1]=max_price-K
 for i in range(0,time_step-1):
-	for j in range(0,price_step-2):
+	vt2[-1,i]=max(i*price_dif-K,0)
+print(vt2,'initial')
+a=0
+b=0
+c=0
+print(vt2,'vt2')
+x=np.linspace(0,total_exercise_time,time_step)
+y=np.linspace(0,max_price,price_step)
+for j in range(0,price_step-2):
+	for i in range(0,time_step-2):
 		a=(0.5*r*j*time_dif)-(0.5*(volatility**2)*(j**2)*time_dif)
 		b=1+((volatility**2)*(j**2)*time_dif)+(r*time_dif)
 		c=(-0.5*r*j*time_dif)-(0.5*(volatility**2)*(j**2)*time_dif)
 		#print(a,'a')
 		#print(b,'b')
 		#print(c,'c')
-		if i!=0:
-			vt2[i][j]=max(vt2[i][j],max(j*price_dif-K,0))
-			vt2[i][j+1]=max(vt2[i][j+1],max((j+1)*price_dif-K,0))
-			vt2[i][j+2]=max(vt2[i][j+2],max((j+2)*price_dif-K,0))
-			vt2[i+1][j+1]=(a*vt2[i][j])+(b*vt2[i][j+1])+(c*vt2[i][j+2])
-		if i==0:
-			vt2[i][j]=max(vt2[i][j],max(j*price_dif-K,0))
-			vt2[i][j+1]=max(vt2[i][j+1],max((j+1)*price_dif-K,0))
-			vt2[i][j+2]=max(vt2[i][j+2],max((j+2)*price_dif-K,0))
-			vt2[1][j+1]=(a*vt2[0][j])+(b*vt2[0][j+1])+(c*vt2[0][j+2])
-print(vt2[999][998],"option price")
+		#if j!=0:
+		vt2[time_step-i-3,price_step-1-j]=max(vt2[time_step-i-3,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
+		vt2[time_step-i-2,price_step-1-j]=max(vt2[time_step-i-2,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
+		vt2[time_step-i-1,price_step-1-j]=max(vt2[time_step-i-1,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
+		vt2[time_step-i-2,time_step-j-2]=(a*vt2[time_step-i-3,price_step-1-j])+(b*vt2[time_step-i-2,price_step-1-j])+(c*vt2[time_step-i-1,price_step-1-j])
+		print(vt2[time_step-i-2,time_step-j-2],'option value')
+		print(i, " time",j," Stock price")
+		#if j==0:
+			#vt2[i,j]=max(vt2[i,j],max(j*price_dif-K,0))
+			#vt2[i+1,j]=max(vt2[i+1,j],max((j+1)*price_dif-K,0))
+			#vt2[i+2,j]=max(vt2[i+2,j],max((j+2)*price_dif-K,0))
+			#vt2[i+1,j+1]=(a*vt2[0,j])+(b*vt2[0,j+1])+(c*vt2[0,j+2])
+print(vt2[18,:],"previous option price")
+print(vt2[17,:],"17th option price")
+print(vt2[:,-1],"option price max sp")
+print(vt2,'vt2')
+print(a,b,c,"abc")
+fig = plt.figure(figsize=(8, 6))
+ax=fig.add_subplot(111, projection='3d')
+surface=ax.plot_surface(x,y,vt2,cmap='viridis',edgecolor='none')
+fig.colorbar(surface, ax=ax, shrink=0.5, aspect=10, label='Z Value')
+ax.set_xlabel('X Axis')
+ax.set_ylabel('Y Axis')
+ax.set_zlabel('Z Axis')
+ax.set_title('3D Surface Plot')
+
+# 5. Show the plot
+plt.show()

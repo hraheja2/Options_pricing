@@ -37,21 +37,29 @@ price_dif=(max_price)/price_step
 v_i=0
 vi2=0
 vi1=0
-vt2=np.zeros(1000)
-vt3=np.zeros(1000)
+vt2=np.zeros((time_step,price_step))
+vt3=np.zeros((time_step,price_step))
 K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][0]
 print(K,'K')
-for i in range(0,time_step-2):
-	vt3=vt2
-	v_i=0
-	vi1=price_dif
-	vi2=2*price_dif
+v_i=0
+vi1=max(price_dif-K,0)
+vi2=max(2*price_dif-K,0)
+for i in range(0,time_step-1):
 	for j in range(0,price_step-2):
-		a=0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
-		b=1+(volatility**2)*(j**2)*time_dif+r*time_dif
-		c=-0.5*r*j*time_dif-0.5*(volatility**2)*(j**2)*time_dif
-		vt2[j+1]=a*v_i+b*vi1+c*vi2
-		v_i=vi1
-		vi1=max((j+1)*price_dif-K,0)
-		vi2=max((j+2)*price_dif-K,0)
-print(vt2[998],"option price")
+		a=(0.5*r*j*time_dif)-(0.5*(volatility**2)*(j**2)*time_dif)
+		b=1+((volatility**2)*(j**2)*time_dif)+(r*time_dif)
+		c=(-0.5*r*j*time_dif)-(0.5*(volatility**2)*(j**2)*time_dif)
+		#print(a,'a')
+		#print(b,'b')
+		#print(c,'c')
+		if i!=0:
+			vt2[i][j]=max(vt2[i][j],max(j*price_dif-K,0))
+			vt2[i][j+1]=max(vt2[i][j+1],max((j+1)*price_dif-K,0))
+			vt2[i][j+2]=max(vt2[i][j+2],max((j+2)*price_dif-K,0))
+			vt2[i+1][j+1]=(a*vt2[i][j])+(b*vt2[i][j+1])+(c*vt2[i][j+2])
+		if i==0:
+			vt2[i][j]=max(vt2[i][j],max(j*price_dif-K,0))
+			vt2[i][j+1]=max(vt2[i][j+1],max((j+1)*price_dif-K,0))
+			vt2[i][j+2]=max(vt2[i][j+2],max((j+2)*price_dif-K,0))
+			vt2[1][j+1]=(a*vt2[0][j])+(b*vt2[0][j+1])+(c*vt2[0][j+2])
+print(vt2[999][998],"option price")

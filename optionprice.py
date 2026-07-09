@@ -28,11 +28,11 @@ print(variance,'variance')
 volatility=np.sqrt(variance*252)
 print(volatility,'volatliity')
 r=0.045
-max_price=2*close_prices[-1]
+max_price=1.5*close_prices[-1]
 print(max_price,'max_price')
 total_exercise_time=1/12
-time_step=20
-price_step=20
+time_step=50
+price_step=50
 time_dif=(total_exercise_time/(time_step))
 price_dif=(max_price)/price_step
 v_i=0
@@ -44,10 +44,10 @@ K=yf.Ticker(stc).option_chain(yf.Ticker(stc).options[0]).calls['strike'][0]
 print(K,'K')
 v_i=0
 vi1=max(price_dif-K,0)
-vi2=max(2*price_dif-K,0)
+vi2=max((2*price_dif)-K,0)
 vt2[:,-1]=max_price-K
 for i in range(0,time_step-1):
-	vt2[-1,i]=max(i*price_dif-K,0)
+	vt2[-1,i]=max((i*price_dif)-K,0)
 print(vt2,'initial')
 a=0
 b=0
@@ -67,7 +67,8 @@ for j in range(0,price_step-2):
 		vt2[time_step-i-3,price_step-1-j]=max(vt2[time_step-i-3,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
 		vt2[time_step-i-2,price_step-1-j]=max(vt2[time_step-i-2,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
 		vt2[time_step-i-1,price_step-1-j]=max(vt2[time_step-i-1,price_step-1-j],max((price_step-1-j)*price_dif-K,0))
-		vt2[time_step-i-2,time_step-j-2]=(a*vt2[time_step-i-3,price_step-1-j])+(b*vt2[time_step-i-2,price_step-1-j])+(c*vt2[time_step-i-1,price_step-1-j])
+		vt2[time_step-i-2,price_step-j-2]=(a*vt2[time_step-i-3,price_step-1-j])+(b*vt2[time_step-i-2,price_step-1-j])+(c*vt2[time_step-i-1,price_step-1-j])
+		vt2[time_step-i-2,price_step-j-2]=max(vt2[time_step-i-2,time_step-j-2],max((price_step-2-j)*price_dif-K,0))
 		print(vt2[time_step-i-2,time_step-j-2],'option value')
 		print(i, " time",j," Stock price")
 		#if j==0:
@@ -75,6 +76,8 @@ for j in range(0,price_step-2):
 			#vt2[i+1,j]=max(vt2[i+1,j],max((j+1)*price_dif-K,0))
 			#vt2[i+2,j]=max(vt2[i+2,j],max((j+2)*price_dif-K,0))
 			#vt2[i+1,j+1]=(a*vt2[0,j])+(b*vt2[0,j+1])+(c*vt2[0,j+2])
+for i in range(0,time_step-1):
+	vt2[i,0]=max(vt2[i,0],max((i)*price_dif-K,0))
 print(vt2[18,:],"previous option price")
 print(vt2[17,:],"17th option price")
 print(vt2[:,-1],"option price max sp")
@@ -91,3 +94,4 @@ ax.set_title('3D Surface Plot')
 
 # 5. Show the plot
 plt.show()
+print(vt2[3,35],"current option price")
